@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Shady Billionaire Clicker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(#111,#000);
+    color: white;
+    text-align: center;
+    overflow-x: hidden;
+}
+
+.darkMode {
+    background: linear-gradient(#f4f4f4,#ddd);
+    color: black;
+}
+
+h1 { margin-top: 15px; }
+
+button {
+    padding: 12px 18px;
+    margin: 6px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+#mainButton { background: gold; color: black; font-weight: bold; }
+#upgradeButton { background: crimson; color: white; }
+#autoButton { background: darkgreen; color: white; }
+#prestigeButton { background: purple; color: white; }
+#darkToggle { background: gray; color: white; }
+
+#money { font-size: 28px; margin: 10px; }
+
+#island { display:none; color: lightblue; margin-top:10px; }
+
+#jet {
+    font-size: 40px;
+    position: relative;
+    left: -200px;
+    transition: left 2s linear;
+}
+
+.floating {
+    position: absolute;
+    font-weight: bold;
+    animation: floatUp 1s forwards;
+}
+
+@keyframes floatUp {
+    from { opacity:1; transform:translateY(0); }
+    to { opacity:0; transform:translateY(-50px); }
+}
+
+#bossBox {
+    display:none;
+    margin-top:15px;
+    padding:10px;
+    border:2px solid red;
+}
+</style>
+</head>
+
+<body>
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Gold_coin_icon.png" width="80">
+<h1>Shady Billionaire Clicker</h1>
+
+<div id="money">$0</div>
+<div>Level: <span id="level">1</span></div>
+<div>Prestige Multiplier: x<span id="prestigeMulti">1</span></div>
+
+<button id="mainButton" onclick="clickMoney(event)">Leak Documents 💼</button><br>
+<button id="upgradeButton" onclick="buyUpgrade()">Upgrade Click ($50)</button>
+<button id="autoButton" onclick="buyAuto()">Auto Investigators ($100)</button>
+<button id="prestigeButton" onclick="prestige()">Prestige ($10,000)</button>
+<button id="darkToggle" onclick="toggleDark()">Toggle Mode</button>
+
+<div id="island">🏝️ Secret Island Unlocked!</div>
+<div id="jet">🚁</div>
+
+<div id="bossBox">
+    <h3>🚨 Boss Event!</h3>
+    <div id="bossHealth">Health: 100</div>
+    <button onclick="attackBoss()">Expose Boss</button>
+</div>
+
+<audio id="bgMusic" loop>
+<source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
+</audio>
+
+<audio id="clickSound">
+<source src="https://www.soundjay.com/button/sounds/button-16.mp3" type="audio/mp3">
+</audio>
+
+<script>
+let money=0, clickPower=1, autoIncome=0, level=1;
+let prestigeMulti=1, upgradeCost=50, autoCost=100;
+let bossActive=false, bossHealth=100;
+let musicStarted=false;
+
+function updateDisplay(){
+document.getElementById("money").innerText="$"+Math.floor(money);
+document.getElementById("level").innerText=level;
+document.getElementById("prestigeMulti").innerText=prestigeMulti;
+}
+
+function clickMoney(e){
+if(!musicStarted){
+document.getElementById("bgMusic").play();
+musicStarted=true;
+}
+document.getElementById("clickSound").play();
+
+let gain=clickPower*prestigeMulti;
+money+=gain;
+createFloating(e.clientX,e.clientY,"+"+gain);
+
+animateJet();
+checkLevel();
+unlockIsland();
+randomScandal();
+maybeSpawnBoss();
+updateDisplay();
+}
+
+function createFloating(x,y,text){
+let div=document.createElement("div");
+div.className="floating";
+div.style.left=x+"px";
+div.style.top=y+"px";
+div.innerText=text;
+document.body.appendChild(div);
+setTimeout(()=>div.remove(),1000);
+}
+
+function buyUpgrade(){
+if(money>=upgradeCost){
+money-=upgradeCost;
+clickPower+=2;
+upgradeCost=Math.floor(upgradeCost*1.8);
+document.getElementById("upgradeButton").innerText=
+"Upgrade Click ($"+upgradeCost+")";
+updateDisplay();
+}
+}
+
+function buyAuto(){
+if(money>=autoCost){
+money-=autoCost;
+autoIncome+=1;
+autoCost=Math.floor(autoCost*2);
+document.getElementById("autoButton").innerText=
+"Auto Investigators ($"+autoCost+")";
+updateDisplay();
+}
+}
+
+function prestige(){
+if(money>=10000){
+prestigeMulti++;
+money=0; clickPower=1; autoIncome=0; level=1;
+upgradeCost=50; autoCost=100;
+document.getElementById("upgradeButton").innerText="Upgrade Click ($50)";
+document.getElementById("autoButton").innerText="Auto Investigators ($100)";
+updateDisplay();
+}
+}
+
+function checkLevel(){ if(money>=level*500) level++; }
+function unlockIsland(){ if(money>=5000) document.getElementById("island").style.display="block"; }
+
+function animateJet(){
+let jet=document.getElementById("jet");
+jet.style.left="100%";
+setTimeout(()=>jet.style.left="-200px",2000);
+}
+
+function randomScandal(){
+if(Math.random()<0.02){
+let bonus=500;
+money+=bonus;
+alert("💥 Random Scandal! +$"+bonus);
+}
+}
+
+function maybeSpawnBoss(){
+if(!bossActive && Math.random()<0.01){
+bossActive=true;
+bossHealth=100;
+document.getElementById("bossBox").style.display="block";
+document.getElementById("bossHealth").innerText="Health: "+bossHealth;
+}
+}
+
+function attackBoss(){
+if(bossActive){
+bossHealth-=clickPower;
+document.getElementById("bossHealth").innerText="Health: "+bossHealth;
+if(bossHealth<=0){
+money+=2000;
+bossActive=false;
+document.getElementById("bossBox").style.display="none";
+alert("🏆 Boss Defeated! +$2000");
+}
+}
+}
+
+function toggleDark(){
+document.body.classList.toggle("darkMode");
+}
+
+setInterval(()=>{
+money+=autoIncome*prestigeMulti;
+updateDisplay();
+saveGame();
+},1000);
+
+function saveGame(){
+localStorage.setItem("shadySave",JSON.stringify({
+money,clickPower,autoIncome,level,prestigeMulti,upgradeCost,autoCost
+}));
+}
+
+function loadGame(){
+let save=JSON.parse(localStorage.getItem("shadySave"));
+if(save){
+money=save.money;
+clickPower=save.clickPower;
+autoIncome=save.autoIncome;
+level=save.level;
+prestigeMulti=save.prestigeMulti;
+upgradeCost=save.upgradeCost;
+autoCost=save.autoCost;
+document.getElementById("upgradeButton").innerText=
+"Upgrade Click ($"+upgradeCost+")";
+document.getElementById("autoButton").innerText=
+"Auto Investigators ($"+autoCost+")";
+}
+updateDisplay();
+}
+
+loadGame();
+</script>
+
+</body>
+</html>
